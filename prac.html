@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance Advisor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="prac.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- HEADER STARTS HERE -->
+    <header>
+        <div class="logo">FinancePro</div>
+        <nav class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#services">Services</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+
+    <!-- BODY STARTS HERE -->
+    <section class="hero" id="home">
+        <h1>Smart Financial Solutions for Your Future</h1>
+        <p>Expert wealth management and investment strategies tailored to your goals</p>
+        <button onclick="scrollToServices()">Explore Services</button>
+    </section>
+
+    <section class="services" id="services">
+        <div class="services-grid">
+            <div class="service-card">
+                <h3>Investment Planning</h3>
+                <p>Strategic portfolio management for long-term growth</p>
+                <img src="/images/investment_plannning.avif" alt="Investment" style="width:100%; margin-top:1rem;">
+            </div>
+            <div class="service-card">
+                <h3>Manager Money</h3>
+                <p>Secure your golden years with our expert planning</p>
+                <img src="/images/RS.jpg" alt="Retirement" style="width:100%; margin-top:1rem;">
+            </div>
+            <div class="service-card">
+                <h3>Learn about different investments</h3>
+                <p>Maximize your savings through smart tax strategies</p>
+                <img src="/images/tax.jpg" alt="Tax" style="width:100%; margin-top:1rem;">
+            </div>
+        </div>
+    </section>
+
+    <section class="calculator">
+        <div class="calculator-container">
+            <h2>AI-Powered Investment Calculator</h2>
+            <div class="input-group">
+                <label>Investment Amount ($)</label>
+                <input type="number" id="investmentAmount" placeholder="Enter amount">
+            </div>
+            
+            <div class="input-group">
+                <label>Investment Duration (years)</label>
+                <input type="number" id="investmentYears" placeholder="Enter years">
+            </div>
+    
+            <div class="input-group">
+                <label>Risk Tolerance</label>
+                <input type="range" min="1" max="5" value="3" class="risk-slider" id="riskTolerance">
+                <div class="risk-labels">
+                    <span>1</span>
+                    <span>2</span>
+                    <span>3</span>
+                    <span>4</span>
+                    <span>5</span>
+                </div>
+            </div>
+    
+            <div class="input-group">
+                <label>Market Trend Score (-1.0 to +1.0)</label>
+                <input type="number" id="marketTrend" min="-1" max="1" step="0.1" placeholder="Enter score">
+            </div>
+    
+            <button onclick="calculateInvestment()">Generate Plan</button>
+    
+            <div class="results" id="results">
+                <h3>AI Recommendation</h3>
+                <div id="recommendation"></div>
+                <h4>Portfolio Breakdown</h4>
+                <div id="portfolio"></div>
+                <canvas id="investmentChart"></canvas>
+                <canvas id="growthChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER STARTS HERE  -->
+    <footer>
+        <p>&copy; 2025 FinancePro. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const expectedReturns = {
+            "Stocks": 0.12,
+            "Bonds": 0.06,
+            "Crypto": 0.08,
+            "Real_Estate": 0.07
+        };
+
+        function scrollToServices() {
+            document.querySelector('.services').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+
+        function calculateInvestment() {
+            // Get user inputs
+            const amount = parseFloat(document.getElementById('investmentAmount').value);
+            const years = parseInt(document.getElementById('investmentYears').value);
+            const risk = parseInt(document.getElementById('riskTolerance').value);
+            const marketTrend = parseFloat(document.getElementById('marketTrend').value);
+
+            // Calculate savings (simplified assumption)
+            const savings = amount * 0.5; // Assuming 50% savings rate
+
+            // Calculate allocations using financial model formulas
+            const allocations = {
+                Stocks: (risk * 0.2 + marketTrend * 0.5) * savings * 0.3,
+                Bonds: ((5 - risk) * 0.2 + (1 - marketTrend) * 0.3) * savings * 0.4,
+                Crypto: (risk * 0.4 + marketTrend * 0.7) * savings * 0.2,
+                Real_Estate: (savings * 0.1) + (risk * 5000)
+            };
+
+            // Find best investment
+            let bestOption = Object.entries(allocations).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+
+            // Calculate projected returns
+            const bestAmount = allocations[bestOption];
+            const annualReturn = expectedReturns[bestOption];
+            const totalReturn = bestAmount * Math.pow(1 + annualReturn, years);
+
+            // Display results
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('recommendation').innerHTML = `
+                <div class="investment-option">
+                    <h4>🌟 Best Option: ${bestOption}</h4>
+                    <p>Recommended Allocation: $${bestAmount.toFixed(2)}</p>
+                    <p>Projected Value after ${years} years: $${totalReturn.toFixed(2)}</p>
+                    <p>Expected Annual Return: ${(annualReturn * 100).toFixed(1)}%</p>
+                </div>
+            `;
+
+                        // Show full portfolio breakdown
+                        document.getElementById('portfolio').innerHTML = Object.entries(allocations)
+                        .map(([asset, value]) => `
+                            <div class="investment-option">
+                                <h4>${asset}</h4>
+                                <p>Allocation: $${value.toFixed(2)}</p>
+                                <p>Projected Value: $${(value * Math.pow(1 + expectedReturns[asset], years)).toFixed(2)}</p>
+                            </div>
+                        `).join('');
+        
+                    // Graph investment allocation
+                    const ctx1 = document.getElementById('investmentChart').getContext('2d');
+                    const investmentChart = new Chart(ctx1, {
+                        type: 'bar',
+                        data: {
+                            labels: Object.keys(allocations),
+                            datasets: [{
+                                label: 'Investment Allocation ($)',
+                                data: Object.values(allocations),
+                                backgroundColor: ['blue', 'green', 'red', 'orange']
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+        
+                    // Graph year-on-year growth
+                    const yearsArray = Array.from({ length: years }, (_, i) => i + 1);
+                    const totalReturns = yearsArray.map(year => bestAmount * Math.pow(1 + annualReturn, year));
+        
+                    const ctx2 = document.getElementById('growthChart').getContext('2d');
+                    const growthChart = new Chart(ctx2, {
+                        type: 'line',
+                        data: {
+                            labels: yearsArray,
+                            datasets: [{
+                                label: 'Total Return ($)',
+                                data: totalReturns,
+                                borderColor: 'purple',
+                                fill: false,
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                }
+            </script>
+        </body>
+        </html>
